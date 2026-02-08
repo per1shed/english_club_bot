@@ -1,0 +1,1 @@
+START, JOIN_CLUB, PAYMENT = range(3)

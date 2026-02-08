@@ -1,13 +1,13 @@
 from telegram.ext import (
     Application,
     CommandHandler,
-)
-from telegram.ext import (
+    CallbackQueryHandler,
     ConversationHandler,
     PicklePersistence,
 )
 from config.config import TELEGRAM_TOKEN
-from bot.handlers.start_handler import start
+from config.states import START, JOIN_CLUB, PAYMENT
+from bot.handlers.start_handler import start, button_handler, cancel
 from logs.logger import logger
 
 def init_bot():
@@ -16,12 +16,19 @@ def init_bot():
         Application.builder().token(TELEGRAM_TOKEN).persistence(persistence).build()
     )
     logger.info("Запуск тг бота ✅")
+    
+    # Создаем ConversationHandler для клуба
     conv_handler = ConversationHandler(
         entry_points=[CommandHandler("start", start)],
-        states={},
-        fallbacks=[CommandHandler("start", start)],
-        name="main_conversation",
+        states={
+            START: [CallbackQueryHandler(button_handler)],
+            JOIN_CLUB: [CallbackQueryHandler(button_handler)],
+            PAYMENT: [CallbackQueryHandler(button_handler)],
+        },
+        fallbacks=[CommandHandler("cancel", cancel)],
+        name="club_conversation",
         persistent=True,
     )
+    
     application.add_handler(conv_handler)
     return application
