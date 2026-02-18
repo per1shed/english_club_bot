@@ -7,8 +7,9 @@ from telegram.ext import (
 )
 from config.config import TELEGRAM_TOKEN
 from config.states import START, JOIN_CLUB, PAYMENT
-from bot.handlers.start_handler import start, button_handler, cancel
+from bot.handlers.start_handler import start, button_handler, cancel, start_WebApp
 from logs.logger import logger
+
 
 def init_bot():
     persistence = PicklePersistence("bot_cache")
@@ -16,7 +17,7 @@ def init_bot():
         Application.builder().token(TELEGRAM_TOKEN).persistence(persistence).build()
     )
     logger.info("Запуск тг бота ✅")
-    
+
     # Создаем ConversationHandler для клуба
     conv_handler = ConversationHandler(
         entry_points=[CommandHandler("start", start)],
@@ -28,7 +29,10 @@ def init_bot():
         fallbacks=[CommandHandler("cancel", cancel)],
         name="club_conversation",
         persistent=True,
+        allow_reentry=True,
     )
-    
+
+    application.add_handler(CommandHandler("webapp", start_WebApp))
+
     application.add_handler(conv_handler)
     return application
